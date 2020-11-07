@@ -1,11 +1,14 @@
 {
   "name": "@zq-jhon/event-emitter",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Event Emitter",
   "main": "event-emitter.js",
   "homepage": "https://github.com/ZQ-jhon/event-emitter",
   "scripts": {},
-  "keywords": ["event-emitter", "event"],
+  "keywords": [
+    "event-emitter",
+    "event"
+  ],
   "private": false,
   "author": "ZQ-jhon",
   "license": "MIT",
