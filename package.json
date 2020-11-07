@@ -14,5 +14,9 @@
   "license": "MIT",
   "peerDependencies": {
     "typescript": "~4.0.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ZQ-jhon/event-emitter"
   }
 }
