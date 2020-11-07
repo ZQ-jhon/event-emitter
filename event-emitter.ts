@@ -1,14 +1,13 @@
 export type MyListener = (args?: any) => void;
-export interface Collection {
-    [key: string]: Array<{ listener: MyListener, isOnce: boolean }>;
-}
+export type Item = { listener: MyListener, isOnce: boolean };
+export type InnerState = Record<string, Item[]>;
 
 export class EventEmitter {
 
     /**
      * 内部状态集
      */
-    private _event: Collection = {};
+    private _event: InnerState = {};
 
     /**
      * 
@@ -23,7 +22,12 @@ export class EventEmitter {
         if (!this._event[type]) {
             this._event[type] = [];
         }
-        this._event[type].push({ isOnce, listener });
+        // 句柄相同时，不进行重复添加
+        if (this._event[type].some(_ => _.listener === listener)) {
+            // throw new Error(`${listener} is existed under ${type} on EventEmitter instance.`);
+        } else {
+            this._event[type].push({ isOnce, listener });
+        }
         return this._event[type].length;
     }
 
@@ -31,11 +35,11 @@ export class EventEmitter {
      * @alias alias of `addEventListener`
      */
     public on(type: string, listener: MyListener) {
-        this.addEventListener(type, listener);
+        return this.addEventListener(type, listener);
     }
 
     public once(type: string, listener: MyListener) {
-        this.addEventListener(type, listener, true);
+        return this.addEventListener(type, listener, true);
     }
 
     /**
@@ -46,7 +50,6 @@ export class EventEmitter {
      */
     public removeEventListener(type: string, listener: MyListener) {
         if (Array.isArray(this._event[type])) {
-            const a = this._event[type];
             const i = this._event[type].findIndex(l => l.listener === listener);
             if (i !== -1) {
                 this._event[type].splice(i, 1);
@@ -66,29 +69,29 @@ export class EventEmitter {
      * @alias alias of `removeEventListener`
      */
     public off(type: string, listener: MyListener) {
-        this.removeEventListener(type, listener);
+        return this.removeEventListener(type, listener);
     }
 
     public removeAllEventListeners(type: string) {
         this._event[type] = [];
-        delete this._event[type];
+        Reflect.deleteProperty(this._event, type);
     }
 
     /**
      * @alias alias of `removeAllEventListeners`
      */
     public offAll(type: string) {
-        this.removeAllEventListeners(type);
+        return this.removeAllEventListeners(type);
     }
 
     /**
      * 
      * @param type 发射的事件类型
      */
-    public emit(type: string, args: any) {
+    public emit(type: string, args?: any) {
         if (this._event[type]) {
             this._event[type].forEach(item => {
-                item.listener.bind(this, ...args);
+                item.listener.call(this, args);
                 if (item.isOnce) {
                     this.removeEventListener(type, item.listener);
                 }
